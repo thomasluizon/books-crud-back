@@ -1,51 +1,14 @@
-// const db = require('./db');
+import { selectBooks, addBook } from './db.js';
+import express from 'express';
 
-const express = require('express');
 const app = express();
 
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
 
-const books = [
-	{
-		id: 1,
-		name: 'Harry Potter and the Philosopher Stone',
-		price: 35,
-		quantity: 30,
-		gender: 'Drama',
-		author_id: 1,
-	},
-	{
-		id: 2,
-		name: 'xuize',
-		price: 10,
-		quantity: 0,
-		gender: 'oii',
-		author_id: 1,
-	},
-	{
-		id: 3,
-		name: 'flavio',
-		price: 420,
-		quantity: 0,
-		gender: 'tchau',
-		author_id: 2,
-	},
-];
-
-const authors = [
-	{
-		id: 1,
-		name: 'J.K. Rowling',
-	},
-	{
-		id: 2,
-		name: 'Flavio',
-	},
-];
-
-app.get('/books', (req, res) => {
+app.get('/books', async (req, res) => {
+	const books = await selectBooks();
 	res.json(books);
 });
 
@@ -69,34 +32,13 @@ app.post('/authors', (req, res) => {
 	}
 });
 
-app.post('/books', (req, res) => {
+app.post('/books', async (req, res) => {
 	const obj = req.body;
 
 	if (Object.keys(obj).length > 0) {
-		const author = authors.filter(author => author.name === obj.author);
-
-		if (author.length === 0) {
-			res.status(404).send('Author not found');
-			return;
-		}
-
-		const authorId = author[0].id;
-
-		const book = {
-			id: books.length + 1,
-			name: obj.name,
-			price: obj.price,
-			quantity: obj.quantity || 0,
-			gender: obj.gender,
-			author_id: authorId,
-		};
-
-		books.push(book);
-
-		res.status(202).send('Book created successfully');
-		return;
-	} else {
-		res.status(400).send('Book not created');
+		const response = await addBook(obj);
+		const status = response === 'Book created successfully' ? 200 : 400;
+		res.status(status).send(response);
 		return;
 	}
 });
