@@ -16,21 +16,22 @@ async function connect() {
 	return connection;
 }
 
-export async function selectBooks() {
-	const connection = await connect();
-	const books = await connection.query('SELECT * FROM books;');
-	return await books[0];
-}
-
-export async function addBook(book) {
-	const connection = await connect();
-
+async function getAuthorId(connection, name) {
 	const authorQuery = await connection.query(
 		'SELECT authors.id FROM authors WHERE name = ?',
-		book.authorName
+		name
 	);
 
 	const author_id = authorQuery[0][0]?.id;
+	return author_id;
+}
+
+// CREATE
+export async function addBook(book) {
+	const connection = await connect();
+
+	const author_id = await getAuthorId(connection, book.authorName);
+
 	if (!author_id) return 'Author not found';
 
 	const sql =
@@ -46,6 +47,132 @@ export async function addBook(book) {
 	try {
 		await connection.query(sql, values);
 		return 'Book created successfully';
+	} catch (err) {
+		return err.message;
+	}
+}
+
+export async function addAuthor(author) {
+	const connection = await connect();
+	const sql = 'INSERT INTO authors (name) VALUES (?);';
+
+	if (!author.name) return 'Author not provided';
+
+	try {
+		connection.query(sql, author.name);
+		return 'Author created successfully';
+	} catch (err) {
+		return err.message;
+	}
+}
+
+// READ
+export async function selectBooks() {
+	const connection = await connect();
+	const books = await connection.query('SELECT * FROM books;');
+	return await books[0];
+}
+
+export async function selectSpecificBook(id) {
+	const connection = await connect();
+	const sql = 'SELECT * FROM books WHERE id = ?';
+
+	const query = await connection.query(sql, id);
+
+	if (query[0].length !== 0) {
+		const book = query[0][0];
+		return book;
+	}
+
+	return 'Book not found';
+}
+
+export async function selectAuthors() {
+	const connection = await connect();
+	const authors = await connection.query('SELECT * FROM authors;');
+	return await authors[0];
+}
+
+export async function selectSpecificAuthor(id) {
+	const connection = await connect();
+	const sql = 'SELECT * FROM authors WHERE id = ?';
+
+	const query = await connection.query(sql, id);
+
+	if (query[0].length !== 0) {
+		const author = query[0][0];
+		return author;
+	}
+
+	return 'Author not found';
+}
+
+// UPDATE
+export async function updateBook(book, id) {
+	const connection = await connect();
+
+	const author_id = await getAuthorId(connection, book.authorName);
+	if (!author_id) return 'Author not found';
+
+	const sql =
+		'UPDATE books SET name=?, price=?, quantity=?, gender=?, author_id=? WHERE id=?';
+	const values = [
+		book.name,
+		book.price,
+		book.quantity,
+		book.gender,
+		author_id,
+		id,
+	];
+
+	try {
+		const query = await connection.query(sql, values);
+		if (query[0].changedRows === 0) return 'Book not found';
+		return 'Book updated successfully';
+	} catch (err) {
+		return err.message;
+	}
+}
+
+export async function updateAuthor(author, id) {
+	const connection = await connect();
+
+	const sql = 'UPDATE authors SET name=? WHERE id=?';
+	const values = [author.name, id];
+
+	try {
+		const query = await connection.query(sql, values);
+		if (query[0].changedRows === 0) return 'Author not found';
+		return 'Author updated successfully';
+	} catch (err) {
+		return err.message;
+	}
+}
+
+// DELETE
+
+export async function deleteBook(id) {
+	const connection = await connect();
+
+	const sql = 'DELETE FROM books WHERE id=?';
+	try {
+		const query = await connection.query(sql, id);
+		if (query[0].affectedRows === 0) return 'Book not found';
+		return 'Book deleted successfully';
+	} catch (err) {
+		return err.message;
+	}
+}
+
+export async function deleteAuthor(id) {
+	const connection = await connect();
+
+	const sql = 'DELETE FROM authors WHERE id=?';
+
+	try {
+		const query = await connection.query(sql, id);
+		if (query[0].affectedRows === 0) return 'Author not found';
+		return 'Author deleted successfully';
 	} catch (err) {
 		return err.message;
 	}
