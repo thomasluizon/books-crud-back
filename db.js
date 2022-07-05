@@ -79,13 +79,16 @@ export async function addAuthor(author) {
 // READ
 export async function selectBooks() {
 	const connection = await connect();
-	const books = await connection.query('SELECT * FROM books;');
+	const books = await connection.query(
+		'SELECT books.*, authors.name AS authorName FROM books JOIN authors ON books.author_id = authors.id;'
+	);
 	return await books[0];
 }
 
 export async function selectSpecificBook(id) {
 	const connection = await connect();
-	const sql = 'SELECT * FROM books WHERE id = ?';
+	const sql =
+		'SELECT books.*, authors.name AS authorName FROM books JOIN authors ON books.author_id = authors.id WHERE books.id = ?';
 
 	const query = await connection.query(sql, id);
 
