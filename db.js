@@ -6,9 +6,19 @@ async function connect() {
 	if (global.connection && global.connection.state !== 'disconnected')
 		return global.connection;
 
-	const connection = await mysql.createConnection(
-		`mysql://root:${process.env.db_password}@localhost:3306/bookscrud`
-	);
+	const host = process.env.MYSQL_HOST || 'localhost';
+	const user = process.env.MYSQL_USER || 'root';
+	const password = process.env.MYSQL_PASS || process.env.db_password;
+	const port = process.env.MYSQL_PORT || '3306';
+	const database = process.env.MYSQL_DB || 'bookscrud';
+
+	const connection = await mysql.createConnection({
+		host,
+		user,
+		password,
+		port,
+		database,
+	});
 
 	console.log('DB connected');
 	global.connection = connection;

@@ -18,6 +18,10 @@ app.use(express.json());
 
 const port = process.env.PORT || 3000;
 
+app.get('/', (req, res) => {
+	res.send('Working!');
+});
+
 // Get books
 app.get('/books', async (req, res) => {
 	const books = await selectBooks();
