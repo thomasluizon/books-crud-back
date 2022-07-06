@@ -26,6 +26,28 @@ async function connect() {
 	return connection;
 }
 
+export async function createInitialTables() {
+	const connection = await connect();
+	await connection.query(`
+		CREATE TABLE IF NOT EXISTS authors (
+			id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+				name VARCHAR(100) NOT NULL
+		);
+	`);
+
+	await connection.query(`
+		CREATE TABLE IF NOT EXISTS books (
+			id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+		name VARCHAR(100) NOT NULL,
+			price FLOAT NOT NULL,
+			quantity INT NOT NULL,
+			gender VARCHAR(100) NOT NULL,
+			author_id INT NOT NULL,
+			FOREIGN KEY (author_id) REFERENCES authors(id)
+	);
+	`);
+}
+
 async function getAuthorId(connection, name) {
 	const authorQuery = await connection.query(
 		'SELECT authors.id FROM authors WHERE name = ?',
