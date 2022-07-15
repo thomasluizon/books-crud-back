@@ -16,3 +16,6 @@ PUT /authors/:id = update author
   
 DELETE /books/:id = delete book  
 DELETE /authors/:id = delete author  
+
+## Front end repo:
+https://github.com/thomasluizon/books-crud-front
