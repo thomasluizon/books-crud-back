@@ -34,7 +34,6 @@ app.get('/books', async (req, res) => {
 });
 
 // Get specific book
-
 app.get('/books/:id', async (req, res) => {
 	const book = await selectSpecificBook(req.params.id);
 
